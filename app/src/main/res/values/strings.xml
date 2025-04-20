@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">VisionHelper</string>
+    <string name="point_camera_at_objects">Point camera at objects…</string>
+    <string name="save_recognition">Save Recognition</string>
+    <string name="image_saved">Image saved!</string>
+    <string name="view_saved_images">View Saved Images</string>
+    <string name="analyzing">Analyzing</string>
+    <string name="no_saved_images">No saved images yet</string>
+    <string name="detected_object_image">Detected object image</string>
+    <string name="capture_preview_title">Capture Preview</string>
+    <string name="save">Save</string>
+    <string name="retake">Retake</string>
+    <string name="detection_details">Detection Details</string>
+    <string name="gallery_title">Saved Detections</string>
+    <string name="gallery_header">Tap image to view, long press to delete</string>
+    <string name="delete_image">Delete Image</string>
+    <string name="delete_image_confirmation">Delete image containing %1$s?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="image_deleted">Image deleted successfully</string>
+    <string name="delete_failed">Failed to delete image</string>
+    <string name="delete_error">Error deleting image: %1$s</string>
+    <string name="refresh">Refresh</string>
+    <string name="home">Return to camera</string>
+</resources>
