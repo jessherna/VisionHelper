@@ -73,6 +73,15 @@ The performance metrics can be toggled on/off using the metrics button in the to
 
 4. Build and run the app using Android Studio's "Run" button.
 
+## Quick Install
+
+### Try it yourself!
+Scan this QR code to download the signed APK and install on your Android device:
+
+![Scan to install VisionHelper](https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com/jessherna/visionhelper/releases/download/v1.0.0/app-release.apk)
+
+**Note:** You must allow "Install unknown apps" for your browser or file manager (Settings → Apps → Special app access → Install unknown apps).
+
 ## Usage
 
 ### Object Detection
