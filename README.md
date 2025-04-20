@@ -2,6 +2,12 @@
 
 VisionHelper is an Android application that uses TensorFlow Lite to identify objects in real-time through your device's camera. The app allows users to save the recognized objects along with their detection details and provides a custom gallery for reviewing past detections.
 
+## Demo
+
+![VisionHelper in action](demo.gif)
+
+*VisionHelper app detecting objects in real-time*
+
 <!-- 
 ## Screenshots
 Add your app screenshots here:
