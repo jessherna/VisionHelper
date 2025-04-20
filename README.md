@@ -8,18 +8,18 @@ VisionHelper is an Android application that uses TensorFlow Lite to identify obj
 
 *VisionHelper app detecting objects in real-time*
 
-<!-- 
 ## Screenshots
-Add your app screenshots here:
-- Main camera view with detection
-- Preview dialog
-- Gallery view
-- etc.
 
-Example:
-![Camera View](screenshots/camera_view.jpg)
-![Gallery View](screenshots/gallery_view.jpg)
--->
+Take a look at the app in action:
+
+<p align="center">
+  <img src="main_page.jpg" width="22%" alt="Main Camera View" />
+  <img src="preview.jpg" width="22%" alt="Capture Preview" />
+  <img src="saved_detections.jpg" width="22%" alt="Saved Detections Gallery" />
+  <img src="performance_report.jpg" width="22%" alt="Performance Report" />
+</p>
+
+*From left to right: Main Camera View with real-time detection, Capture Preview with confidence bar, Gallery of saved detections, Performance metrics dashboard.*
 
 ## Features
 
@@ -31,6 +31,18 @@ Example:
 - **Custom Gallery**: Browse, view, and manage all your saved detections
 - **Delete Functionality**: Remove unwanted images from the gallery
 - **User-Friendly Navigation**: Easy-to-use interface with intuitive controls
+- **Performance Metrics**: Real-time monitoring of inference latency and FPS
+
+## Performance Metrics
+
+VisionHelper includes an in-app performance dashboard that displays:
+
+- **Inference Latency**: Time in milliseconds to process each frame
+- **Frames Per Second (FPS)**: Number of frames processed per second
+- **Device Information**: Current device manufacturer and model
+- **Model Details**: AI model being used for object detection
+
+The performance metrics can be toggled on/off using the metrics button in the top-right corner, making it easy to benchmark performance across different devices and conditions.
 
 ## Technologies Used
 
@@ -85,6 +97,33 @@ Example:
 4. To delete an image, tap the red delete button in the top-right corner of the image.
 5. Use the "Return to camera" button at the bottom to go back to the camera view.
 
+### Performance Monitoring
+
+1. Tap the metrics icon in the top right corner to view real-time performance data.
+2. The dashboard displays inference time, FPS, device information, and model details.
+3. Use this data to benchmark performance across different devices and configurations.
+
+## Technical Deep Dive
+
+### ML Pipeline
+
+VisionHelper uses a quantized MobileNet v1 model for efficient on-device inference:
+
+1. **Frame Acquisition**: CameraX API captures frames from the device camera
+2. **Pre-processing**: Each frame is resized to 224x224 pixels (the MobileNet input size)
+3. **Inference**: The TensorFlow Lite interpreter processes the frame
+4. **Post-processing**: Top predictions are extracted and displayed with confidence scores
+5. **Performance Tracking**: Each inference is timed and aggregated to calculate metrics
+
+### Threading Model
+
+The app uses a multi-threaded approach for smooth performance:
+
+- **Main Thread**: Handles UI updates and user interactions
+- **Camera Thread**: Managed by CameraX for frame capture
+- **Analysis Thread**: Processes frames and runs the TensorFlow model
+- **Coroutines**: Used for background operations like saving images
+
 ## Project Structure
 
 - **MainActivity**: Handles camera functionality and real-time object detection
@@ -92,15 +131,33 @@ Example:
 - **CapturePreviewDialog**: Displays image preview with detection details before saving
 - **GalleryActivity**: Custom gallery implementation for browsing saved detections
 
-## How It Works
+## Roadmap
 
-VisionHelper uses a MobileNet TensorFlow Lite model to classify objects in camera frames. The app:
+Future enhancements planned for VisionHelper:
 
-1. Processes camera frames in real-time
-2. Feeds the frames to the TensorFlow model
-3. Interprets the model's output to determine object classes and confidence scores
-4. Displays the results to the user with visual feedback
-5. Allows saving images with metadata for later reference
+### Model Improvements
+- [ ] Support for quantized and float variants with automatic selection based on device capabilities
+- [ ] Integration of Samsung-specific NPUs and acceleration libraries
+- [ ] Fine-tuned models for specific domains (household objects, retail products)
+- [ ] Advanced vision tasks like segmentation and pose estimation
+
+### Samsung Ecosystem Integration
+- [ ] One UI design language adoption for Samsung-native look and feel
+- [ ] Bixby integration for voice-controlled object detection
+- [ ] SmartThings connectivity for IoT device interaction
+- [ ] Galaxy Watch companion for remote viewing and control
+
+### UX Enhancements
+- [ ] AR overlays using ARCore for interactive detection visualization
+- [ ] Dark mode support with automatic theme switching
+- [ ] Multi-language support for global markets
+- [ ] Accessibility features for vision-impaired users
+
+### Technical Enhancements
+- [ ] Edge AI model management with on-device learning capabilities
+- [ ] Multi-model pipeline for combined object detection and recognition
+- [ ] Cloud synchronization for detection history
+- [ ] Comprehensive testing suite and CI/CD pipeline
 
 ## License
 

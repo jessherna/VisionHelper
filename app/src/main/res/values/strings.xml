@@ -12,7 +12,7 @@
     <string name="retake">Retake</string>
     <string name="detection_details">Detection Details</string>
     <string name="gallery_title">Saved Detections</string>
-    <string name="gallery_header">Tap image to view, long press to delete</string>
+    <string name="gallery_header">Tap image to view, long press to select</string>
     <string name="delete_image">Delete Image</string>
     <string name="delete_image_confirmation">Delete image containing %1$s?</string>
     <string name="delete">Delete</string>
@@ -22,4 +22,12 @@
     <string name="delete_error">Error deleting image: %1$s</string>
     <string name="refresh">Refresh</string>
     <string name="home">Return to camera</string>
+    <string name="select">Select</string>
+    <string name="select_all">Select All</string>
+    <string name="deselect_all">Deselect All</string>
+    <string name="delete_selected">Delete Selected</string>
+    <string name="delete_selected_confirmation">Are you sure you want to delete %1$d selected items?</string>
+    <string name="selection_mode">Select items</string>
+    <string name="items_selected">%1$d selected</string>
+    <string name="powered_by_tensorflow">Powered by: TensorFlow Lite</string>
 </resources>

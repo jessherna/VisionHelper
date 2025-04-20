@@ -68,20 +68,20 @@
         android:background="?attr/colorPrimary"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:padding="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
-
-        <ImageButton
-            android:id="@+id/homeButton"
+            
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/home"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="@android:color/white" />
+            android:text="@string/powered_by_tensorflow"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:drawableStart="@drawable/ic_tensorflow"
+            android:drawablePadding="8dp"
+            android:fontFamily="sans-serif-medium" />
 
     </LinearLayout>
 

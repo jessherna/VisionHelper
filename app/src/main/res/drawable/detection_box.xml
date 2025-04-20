@@ -3,9 +3,9 @@
     android:shape="rectangle">
     <stroke
         android:width="2dp"
-        android:color="#4CAF50"
+        android:color="@color/samsung_accent"
         android:dashWidth="10dp"
         android:dashGap="5dp" />
     <corners android:radius="4dp" />
-    <solid android:color="#1A4CAF50" />
+    <solid android:color="#1A00B0FF" />
 </shape> 

@@ -25,6 +25,7 @@ import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class ObjectDetectionViewModel(application: Application) : AndroidViewModel(application) {
     private val application = getApplication<Application>()
@@ -40,6 +41,17 @@ class ObjectDetectionViewModel(application: Application) : AndroidViewModel(appl
     private var _currentBitmap: Bitmap? = null
     val currentBitmap: Bitmap?
         get() = _currentBitmap
+        
+    // Performance metrics
+    private val _inferenceTime = MutableLiveData<Long>()
+    val inferenceTime: LiveData<Long> = _inferenceTime
+    
+    private val _framesPerSecond = MutableLiveData<Float>()
+    val framesPerSecond: LiveData<Float> = _framesPerSecond
+    
+    private var frameCount = 0
+    private var lastFpsTimestamp = System.currentTimeMillis()
+    private val fpsUpdateInterval = 1000L // Update FPS every second
 
     init {
         loadLabels()
@@ -113,6 +125,19 @@ class ObjectDetectionViewModel(application: Application) : AndroidViewModel(appl
 
     fun analyzeImage(bitmap: Bitmap) {
         _currentBitmap = bitmap
+        frameCount++
+        
+        // Update FPS calculation
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastFpsTimestamp >= fpsUpdateInterval) {
+            val elapsedSeconds = (currentTime - lastFpsTimestamp) / 1000f
+            val fps = frameCount / elapsedSeconds
+            _framesPerSecond.postValue(fps)
+            
+            // Reset counters
+            frameCount = 0
+            lastFpsTimestamp = currentTime
+        }
 
         viewModelScope.launch(Dispatchers.Default) {
             try {
@@ -122,8 +147,16 @@ class ObjectDetectionViewModel(application: Application) : AndroidViewModel(appl
                 // Convert to TensorImage
                 val tensorImage = TensorImage.fromBitmap(resizedBitmap)
 
+                // Start timing the inference
+                val inferenceStartTime = System.nanoTime()
+                
                 // Run inference
                 val results = imageClassifier?.classify(tensorImage)
+                
+                // Calculate inference time
+                val inferenceEndTime = System.nanoTime()
+                val inferenceTimeMs = TimeUnit.NANOSECONDS.toMillis(inferenceEndTime - inferenceStartTime)
+                _inferenceTime.postValue(inferenceTimeMs)
 
                 // Process results
                 if (!results.isNullOrEmpty() && results[0].categories.isNotEmpty()) {
@@ -282,6 +315,26 @@ class ObjectDetectionViewModel(application: Application) : AndroidViewModel(appl
         super.onCleared()
         imageClassifier?.close()
     }
+
+    // Add method to get performance report
+    fun getPerformanceReport(): PerformanceMetrics {
+        return PerformanceMetrics(
+            averageInferenceTimeMs = _inferenceTime.value ?: 0,
+            framesPerSecond = _framesPerSecond.value ?: 0f,
+            modelName = "MobileNet v1 1.0 224 Quantized",
+            deviceInfo = "${Build.MANUFACTURER} ${Build.MODEL}",
+            androidVersion = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
+        )
+    }
+    
+    // Data class to hold performance metrics
+    data class PerformanceMetrics(
+        val averageInferenceTimeMs: Long,
+        val framesPerSecond: Float,
+        val modelName: String,
+        val deviceInfo: String,
+        val androidVersion: String
+    )
 
     companion object {
         private const val TAG = "ObjectDetectionVM"

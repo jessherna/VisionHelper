@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -90,9 +91,13 @@ class CapturePreviewDialog(
             
             holder.labelTextView.text = formattedLabel
             
-            // Format confidence as percentage
-            val confidence = String.format("%.1f", result.confidence * 100)
+            // Format confidence as percentage and set progress bar
+            val confidenceValue = result.confidence * 100
+            val confidence = String.format("%.1f", confidenceValue)
             holder.confidenceTextView.text = "$confidence%"
+            
+            // Update progress bar with confidence value (0-100)
+            holder.confidenceProgressBar.progress = confidenceValue.toInt()
         }
         
         override fun getItemCount(): Int = detectionResults.size
@@ -100,6 +105,7 @@ class CapturePreviewDialog(
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val labelTextView: TextView = view.findViewById(R.id.detailLabelText)
             val confidenceTextView: TextView = view.findViewById(R.id.detailConfidenceText)
+            val confidenceProgressBar: ProgressBar = view.findViewById(R.id.confidenceProgressBar)
         }
     }
 } 

@@ -15,11 +15,11 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/purple_500"
+            android:background="@color/samsung_blue"
             android:padding="16dp"
             android:text="@string/capture_preview_title"
             android:textColor="@android:color/white"
-            android:textSize="18sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <ImageView
@@ -38,7 +38,8 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:text="@string/detection_details"
-            android:textSize="16sp"
+            android:textColor="@color/samsung_gray_dark"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -48,7 +49,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             tools:itemCount="3"
             tools:listitem="@layout/detection_detail_item" />
 
@@ -57,21 +58,26 @@
             android:layout_height="wrap_content"
             android:gravity="end"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:padding="16dp">
 
             <Button
                 android:id="@+id/retakeButton"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/retake" />
+                android:layout_marginEnd="8dp"
+                android:text="@string/retake"
+                android:backgroundTint="@color/samsung_accent"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/saveButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/save" />
+                android:text="@string/save"
+                android:backgroundTint="@color/samsung_blue"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView> 

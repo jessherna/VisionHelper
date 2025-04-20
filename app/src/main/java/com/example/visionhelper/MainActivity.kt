@@ -31,6 +31,11 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.widget.ImageButton
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import android.net.Uri
+import androidx.core.content.FileProvider
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: ObjectDetectionViewModel
@@ -41,12 +46,29 @@ class MainActivity : AppCompatActivity() {
     private lateinit var galleryButton: ImageButton
     private lateinit var detectionBoxView: View
     private lateinit var boxLabelText: TextView
-
+    
+    // Performance metrics UI
+    private lateinit var metricsToggleButton: ImageButton
+    private lateinit var metricsPanel: View
+    private lateinit var inferenceTimeText: TextView
+    private lateinit var fpsText: TextView
+    private lateinit var deviceInfoText: TextView
+    private lateinit var modelInfoText: TextView
+    private lateinit var exportMetricsButton: Button
+    
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     
     private var boxAnimator: ValueAnimator? = null
+    
+    // Flag to track metrics visibility
+    private var metricsVisible = false
+    
+    private lateinit var performanceExporter: PerformanceExporter
+    
+    // Add this property at the class level with the other properties
+    private val appStartTime = System.currentTimeMillis()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +76,9 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize ViewModel
         viewModel = ViewModelProvider(this)[ObjectDetectionViewModel::class.java]
+        
+        // Initialize performance exporter
+        performanceExporter = PerformanceExporter(this)
 
         // Initialize views
         previewView = findViewById(R.id.previewView)
@@ -63,6 +88,18 @@ class MainActivity : AppCompatActivity() {
         galleryButton = findViewById(R.id.galleryButton)
         detectionBoxView = findViewById(R.id.detectionBoxView)
         boxLabelText = findViewById(R.id.boxLabelText)
+        
+        // Initialize performance metrics UI
+        metricsToggleButton = findViewById(R.id.metricsToggleButton)
+        metricsPanel = findViewById(R.id.metricsPanel)
+        inferenceTimeText = findViewById(R.id.inferenceTimeText)
+        fpsText = findViewById(R.id.fpsText)
+        deviceInfoText = findViewById(R.id.deviceInfoText)
+        modelInfoText = findViewById(R.id.modelInfoText)
+        exportMetricsButton = findViewById(R.id.exportMetricsButton)
+        
+        // Initially hide metrics panel
+        metricsPanel.visibility = View.GONE
 
         // Set up button click listeners
         captureButton.setOnClickListener {
@@ -90,6 +127,16 @@ class MainActivity : AppCompatActivity() {
         galleryButton.setOnClickListener {
             GalleryActivity.start(this)
         }
+        
+        // Set up metrics toggle button
+        metricsToggleButton.setOnClickListener {
+            toggleMetricsVisibility()
+        }
+        
+        // Set up export metrics button
+        exportMetricsButton.setOnClickListener {
+            exportPerformanceReport()
+        }
 
         // Initialize camera executor
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -112,6 +159,9 @@ class MainActivity : AppCompatActivity() {
                 }, 2000)
             }
         }
+        
+        // Observe performance metrics
+        observePerformanceMetrics()
         
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -325,6 +375,117 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         cameraExecutor.shutdown()
         boxAnimator?.cancel()
+    }
+
+    private fun observePerformanceMetrics() {
+        // Observe inference time
+        viewModel.inferenceTime.observe(this) { timeMs ->
+            inferenceTimeText.text = "Inference: ${timeMs}ms"
+        }
+        
+        // Observe FPS
+        viewModel.framesPerSecond.observe(this) { fps ->
+            fpsText.text = "FPS: ${String.format("%.1f", fps)}"
+        }
+        
+        // Set device and model info
+        val metrics = viewModel.getPerformanceReport()
+        deviceInfoText.text = "Device: ${metrics.deviceInfo}"
+        modelInfoText.text = "Model: ${metrics.modelName}"
+    }
+    
+    private fun toggleMetricsVisibility() {
+        metricsVisible = !metricsVisible
+        metricsPanel.visibility = if (metricsVisible) View.VISIBLE else View.GONE
+        
+        // Update toggle button icon
+        metricsToggleButton.setImageResource(
+            if (metricsVisible) R.drawable.ic_metrics_on else R.drawable.ic_metrics_off
+        )
+    }
+
+    private fun exportPerformanceReport() {
+        // Get the latest metrics
+        val metrics = viewModel.getPerformanceReport()
+        
+        // Create additional notes with test conditions
+        val additionalNotes = "Test conditions:\n" +
+                "- Lighting: Indoor artificial lighting\n" +
+                "- Number of objects in frame: Varied (1-3)\n" +
+                "- Distance to objects: 0.5-1.5 meters\n" +
+                "- Sample duration: ${getDurationString()}"
+        
+        // Generate the report content
+        val reportContent = performanceExporter.generateReportContent(metrics, additionalNotes)
+        
+        // Show the report in a dialog
+        val dialog = PerformanceReportDialog(
+            this,
+            reportContent,
+            onShareClick = { content ->
+                // Save and share the report when the share button is clicked
+                saveAndShareReport(metrics, additionalNotes)
+            }
+        )
+        dialog.show()
+    }
+    
+    private fun saveAndShareReport(metrics: ObjectDetectionViewModel.PerformanceMetrics, additionalNotes: String) {
+        // Launch coroutine to export the report
+        CoroutineScope(Dispatchers.Main).launch {
+            val filePath = performanceExporter.exportMetricsToFile(metrics, additionalNotes)
+            
+            if (filePath != null) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Performance report saved",
+                    Toast.LENGTH_SHORT
+                ).show()
+                
+                // If the filePath is a content URI, we can offer to share it
+                if (filePath.startsWith("content://")) {
+                    offerToShareReport(Uri.parse(filePath))
+                } else {
+                    // For file paths on older Android versions
+                    val file = java.io.File(filePath)
+                    val fileUri = FileProvider.getUriForFile(
+                        this@MainActivity,
+                        "${applicationContext.packageName}.fileprovider",
+                        file
+                    )
+                    offerToShareReport(fileUri)
+                }
+            } else {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Failed to save performance report",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+    
+    private fun offerToShareReport(fileUri: Uri) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_STREAM, fileUri)
+            putExtra(Intent.EXTRA_SUBJECT, "VisionHelper Performance Report")
+            putExtra(Intent.EXTRA_TEXT, "Attached is a performance report from the VisionHelper app.")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        
+        startActivity(Intent.createChooser(intent, "Share Performance Report"))
+    }
+    
+    private fun getDurationString(): String {
+        // Calculate time since app was started
+        val uptime = (System.currentTimeMillis() - appStartTime) / 1000
+        if (uptime < 60) {
+            return "$uptime seconds"
+        }
+        val minutes = uptime / 60
+        val seconds = uptime % 60
+        return "$minutes minutes, $seconds seconds"
     }
 
     companion object {
